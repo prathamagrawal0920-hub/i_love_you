@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firework Animation</title>
+    <style>
+        body {
+            background-color: #111;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            cursor: pointer;
+        }
+
+        .projectile {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .particule {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .letter {
+            position: absolute;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <script>
+        const letters = "I LOVE YOU";
+        let letterIndex = 0;
+
+        document.addEventListener('click', (e) => {
+            createFirework(e.clientX, e.clientY);
+        });
+
+        function createFirework(x, y) {
+            const startY = window.innerHeight;
+            const launchHeight = startY - y;
+
+            const projectile = document.createElement("div");
+            projectile.classList.add("projectile");
+            document.body.appendChild(projectile);
+
+            projectile.style.left = `${x}px`;
+            projectile.style.top = `${startY}px`;
+
+            anime({
+                targets: projectile,
+                translateY: -launchHeight,
+                duration: 1200,
+                easing: "easeOutQuad",
+                complete: () => {
+                    projectile.remove();
+                    createBurst(x, y);
+                }
+            });
+        }
+
+        function createBurst(x, y) {
+            const colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C'];
+            const numParticles = 30;
+            const text = "I LOVE YOU";
+            const fontSize = 30; // Approx width per char
+            const totalWidth = text.length * 20; // Estimate width
+            const startX = x - (totalWidth / 2);
+
+            // Create Text Elements
+            for (let i = 0; i < text.length; i++) {
+                const letterEl = document.createElement("div");
+                letterEl.classList.add("letter");
+                letterEl.textContent = text[i];
+
+                // Position each letter
+                const letterX = startX + (i * 20);
+                letterEl.style.left = `${letterX}px`;
+                letterEl.style.top = `${y}px`;
+
+                document.body.appendChild(letterEl);
+
+                // Animate Letter
+                anime({
+                    targets: letterEl,
+                    scale: [0, 1.5],
+                    opacity: [1, 0],
+                    translateY: -20, // Slight float up
+                    duration: 2500,
+                    delay: i * 50, // Slight wave effect
+                    easing: 'easeOutExpo',
+                    complete: () => {
+                        letterEl.remove();
+                    }
+                });
+            }
+
+            // Create Particles
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement("div");
+                particle.classList.add("particule");
+                document.body.appendChild(particle);
+
+                const color = colors[anime.random(0, colors.length - 1)];
+                particle.style.backgroundColor = color;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                const angle = anime.random(0, 360) * Math.PI / 180;
+                const radius = anime.random(50, 200);
+                const endX = Math.cos(angle) * radius;
+                const endY = Math.sin(angle) * radius;
+
+                anime({
+                    targets: particle,
+                    translateX: endX,
+                    translateY: endY,
+                    scale: [1, 0], // Shrink to 0
+                    opacity: [1, 0],
+                    duration: anime.random(800, 1600),
+                    easing: 'easeOutExpo',
+                    complete: () => {
+                        particle.remove();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
